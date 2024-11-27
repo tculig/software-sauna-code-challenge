@@ -1,8 +1,8 @@
-// src/Maze.tsx
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Cell from './Cell';
 import Controls from './Controls';
+import useMazeTraverser, { TraversalState } from './useMazeTraverser';
 
 const mazeData = [
   ['', '', '', '', '', 'x', '', '', '', '', '', '', '', '', '', ''],
@@ -13,123 +13,38 @@ const mazeData = [
   ['', '', '', '', '', '+', 'B', '-', '+', '', '', '+', '-', '-', '+', ''],
 ];
 
-const MazeContainer = styled.div<{ $columnCount: number }>`
+const MazeContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(${({ $columnCount }) => $columnCount}, 20px);
+  grid-template-columns: repeat(${mazeData[0].length}, 20px);
   grid-gap: 1px;
   justify-content: center;
   margin-bottom: 20px;
 `;
 
 const Maze: React.FC = () => {
+  const [mazeGrid, setMazeGrid] = useState<string[][]>([]);
   const [currentPosition, setCurrentPosition] = useState<{ x: number; y: number } | null>(null);
   const [collectedLetters, setCollectedLetters] = useState<string[]>([]);
+  const [pathLetters, setPathLetters] = useState<string[]>([]);
   const [isTraversing, setIsTraversing] = useState<boolean>(false);
 
-  const startTraversal = useCallback(() => {
-    setCollectedLetters([]);
-    setIsTraversing(true);
+  useEffect(() => {
+    setMazeGrid(mazeData);
+  }, []);
 
-    // Find the starting position '@'
-    let posX = -1;
-    let posY = -1;
-    for (let y = 0; y < mazeData.length; y++) {
-      const x = mazeData[y].indexOf('@');
-      if (x !== -1) {
-        posX = x;
-        posY = y;
-        break;
-      }
-    }
+  const handleUpdate = ({ currentPosition, collectedLetters, isTraversing, pathLetters }: TraversalState) => {
+    setCurrentPosition(currentPosition);
+    setCollectedLetters(collectedLetters);
+    setPathLetters(pathLetters);
+    setIsTraversing(isTraversing);
+  };
 
-    if (posX === -1 || posY === -1) {
-      alert('Starting position "@" not found.');
-      setIsTraversing(false);
-      return;
-    }
-    console.log(posX + " " + posY)
-
-    let direction: [number, number] = [1, 0]; // Initial direction (moving right)
-
-    const letters: string[] = [];
-
-    const traverse = () => {
-      if (!isTraversing) return;
-
-      const x = posX;
-      const y = posY;
-      const c = mazeData[y][x];
-
-      setCurrentPosition({ x, y });
-
-      if (c === 'x') {
-        // Reached the end
-        setIsTraversing(false);
-        return;
-      } else if (c === ' ' || c === '') {
-        // End of path
-        setIsTraversing(false);
-        return;
-      } else if (c === '+') {
-        const directions: [number, number][] = [
-          [-1, 0], // left
-          [1, 0],  // right
-          [0, -1], // up
-          [0, 1],  // down
-        ];
-
-        for (const [dx, dy] of directions) {
-          const newX = x + dx;
-          const newY = y + dy;
-          if (dx === -direction[0] && dy === -direction[1]) {
-            continue;
-          }
-          if (
-            newY >= 0 &&
-            newY < mazeData.length &&
-            newX >= 0 &&
-            newX < mazeData[newY].length
-          ) {
-            const c2 = mazeData[newY][newX];
-            if (c2 !== ' ' && c2 !== '') {
-              direction = [dx, dy];
-              break;
-            }
-          }
-        }
-      } else if (/[A-Z]/.test(c)) {
-        if (!letters.includes(c)) {
-          letters.push(c);
-          setCollectedLetters([...letters]);
-        }
-      }
-
-      // Move to next position
-      posX += direction[0];
-      posY += direction[1];
-
-      // Check bounds
-      if (
-        posY < 0 ||
-        posY >= mazeData.length ||
-        posX < 0 ||
-        posX >= mazeData[posY].length
-      ) {
-        setIsTraversing(false);
-        return;
-      }
-
-      // Continue traversal after a delay
-      setTimeout(traverse, 300);
-    };
-
-    traverse();
-  }, [isTraversing]);
+  const { startTraversal } = useMazeTraverser(mazeGrid, handleUpdate);
 
   return (
     <>
-      <MazeContainer $columnCount={mazeData[0].length}>
-        {mazeData.map((row, y) =>
+      <MazeContainer>
+        {mazeGrid.map((row, y) =>
           row.map((cell, x) => (
             <Cell
               key={`${x}-${y}`}
@@ -145,6 +60,7 @@ const Maze: React.FC = () => {
         collectedLetters={collectedLetters}
         onStart={startTraversal}
         isTraversing={isTraversing}
+        pathLetters={pathLetters}
       />
     </>
   );
