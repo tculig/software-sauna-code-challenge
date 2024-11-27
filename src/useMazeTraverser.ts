@@ -1,6 +1,6 @@
 import { useRef, useCallback } from "react";
 
-interface Position {
+export interface Position {
   x: number;
   y: number;
 }
@@ -28,16 +28,27 @@ export default function useMazeTraverser(
   const pathLettersRef = useRef<string[]>([]);
   const currentPositionRef = useRef<Position | null>(null);
   const directionRef = useRef<Direction>({ x: 0, y: 0 });
+  const visitedRef = useRef<Position[]>([]);
   const delayTime = 150;
 
+  const sendUpdate = useCallback(() => {
+    onUpdate({
+      currentPosition: currentPositionRef.current,
+      collectedLetters: collectedLettersRef.current,
+      pathLetters: pathLettersRef.current,
+      isTraversing: isTraversing.current,
+    });
+  }, [onUpdate]);
+
   const traverse = useCallback(() => {
-    if (!isTraversing || !currentPositionRef.current) return;
+    if (!isTraversing.current || !currentPositionRef.current) return;
 
     directionRef.current = findDirection(
       mazeGrid,
       currentPositionRef.current,
       directionRef.current
     );
+
     const { x, y } = currentPositionRef.current;
     // Move to next position
     currentPositionRef.current = {
@@ -54,12 +65,7 @@ export default function useMazeTraverser(
         mazeGrid[currentPositionRef.current.y].length - 1
     ) {
       isTraversing.current = false;
-      onUpdate({
-        currentPosition: currentPositionRef.current,
-        collectedLetters: collectedLettersRef.current,
-        pathLetters: pathLettersRef.current,
-        isTraversing: false,
-      });
+      sendUpdate();
       return;
     }
 
@@ -69,32 +75,23 @@ export default function useMazeTraverser(
     if (c === "x") {
       // Reached the end
       isTraversing.current = false;
-      onUpdate({
-        currentPosition: currentPositionRef.current,
-        collectedLetters: collectedLettersRef.current,
-        pathLetters: pathLettersRef.current,
-        isTraversing: false,
-      });
+      sendUpdate();
       return;
     }
 
     if (/[A-Z]/.test(c)) {
       // Collect letter
-      if (!collectedLettersRef.current.includes(c)) {
+      if (!visitedRef.current.includes(currentPositionRef.current)) {
         collectedLettersRef.current.push(c);
+        visitedRef.current.push(currentPositionRef.current);
       }
     }
 
-    onUpdate({
-      currentPosition: currentPositionRef.current,
-      collectedLetters: collectedLettersRef.current,
-      pathLetters: pathLettersRef.current,
-      isTraversing: true,
-    });
+    sendUpdate();
 
     // Continue traversal after a delay
     traversalTimeoutRef.current = window.setTimeout(traverse, delayTime);
-  }, [isTraversing, mazeGrid, onUpdate]);
+  }, [mazeGrid, sendUpdate]);
 
   const findDirection = (
     mazeGrid: string[][],
@@ -147,8 +144,8 @@ export default function useMazeTraverser(
 
   const startTraversal = useCallback(() => {
     collectedLettersRef.current = [];
+    pathLettersRef.current = [];
     isTraversing.current = true;
-
     // Find the starting position '@'
     let posX = -1;
     let posY = -1;
@@ -169,28 +166,18 @@ export default function useMazeTraverser(
 
     currentPositionRef.current = { x: posX, y: posY };
     pathLettersRef.current.push(mazeGrid[posY][posX]);
-    onUpdate({
-      currentPosition: currentPositionRef.current,
-      collectedLetters: collectedLettersRef.current,
-      pathLetters: pathLettersRef.current,
-      isTraversing: true,
-    });
+    sendUpdate();
 
     window.setTimeout(traverse, delayTime);
-  }, [mazeGrid, onUpdate, traverse]);
+  }, [mazeGrid, sendUpdate, traverse]);
 
   const stopTraversal = useCallback(() => {
     isTraversing.current = false;
     if (traversalTimeoutRef.current !== null) {
       clearTimeout(traversalTimeoutRef.current);
     }
-    onUpdate({
-      currentPosition: currentPositionRef.current,
-      collectedLetters: collectedLettersRef.current,
-      pathLetters: pathLettersRef.current,
-      isTraversing: false,
-    });
-  }, [onUpdate]);
+    sendUpdate();
+  }, [sendUpdate]);
 
   return { startTraversal, stopTraversal };
 }
