@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import Cell from './Cell';
 import Controls from './Controls';
 import useMazeTraverser, { TraversalState } from './useMazeTraverser';
-
+import { transformMap } from './utils';
+/*
 const mazeData = [
   ['', '', '', '', '', 'x', '', '', '', '', '', '', '', '', '', ''],
   ['', '', '', '', '', '|', '', '', '+', '-', '-', '+', '', '', '', ''],
@@ -12,25 +13,27 @@ const mazeData = [
   ['', '', '', '', '', '|', '', '', '|', '', '', '|', '', '', 'D', ''],
   ['', '', '', '', '', '+', 'B', '-', '+', '', '', '+', '-', '-', '+', ''],
 ];
+*/
+const mazeData = `
+ +-L-+  
+ |  +A-+
+@B+ ++ H
+ ++    x`;
+const mazeGrid = transformMap(mazeData);
 
 const MazeContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(${mazeData[0].length}, 20px);
+  grid-template-columns: repeat(${mazeGrid[0].length}, 20px);
   grid-gap: 1px;
   justify-content: center;
   margin-bottom: 20px;
 `;
 
 const Maze: React.FC = () => {
-  const [mazeGrid, setMazeGrid] = useState<string[][]>([]);
   const [currentPosition, setCurrentPosition] = useState<{ x: number; y: number } | null>(null);
   const [collectedLetters, setCollectedLetters] = useState<string[]>([]);
   const [pathLetters, setPathLetters] = useState<string[]>([]);
   const [isTraversing, setIsTraversing] = useState<boolean>(false);
-
-  useEffect(() => {
-    setMazeGrid(mazeData);
-  }, []);
 
   const handleUpdate = ({ currentPosition, collectedLetters, isTraversing, pathLetters }: TraversalState) => {
     setCurrentPosition(currentPosition);
