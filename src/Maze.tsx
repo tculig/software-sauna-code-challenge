@@ -15,10 +15,14 @@ const mazeData = [
 ];
 */
 const mazeData = `
- +-L-+  
- |  +A-+
-@B+ ++ H
- ++    x`;
+  @
+  | +-C--+
+  A |    |
+  +---B--+
+    |      x
+    |      |
+    +---D--+
+ `;
 const mazeGrid = transformMap(mazeData);
 
 const MazeContainer = styled.div`

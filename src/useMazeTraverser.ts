@@ -160,6 +160,7 @@ export default function useMazeTraverser(mazeGrid: string[][], onUpdate: (state:
         errorsRef.current = [];
         visitedRef.current = [];
         isTraversing.current = true;
+        directionRef.current = { x: 0, y: 0 };
         // Find the starting position '@'
         let posX = -1;
         let posY = -1;

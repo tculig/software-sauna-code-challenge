@@ -9,7 +9,7 @@ const AppContainer = styled.div`
 const App: React.FC = () => {
   return (
     <AppContainer>
-      <h1>Maze Traversal Game</h1>
+      <h1>Maze Traversal</h1>
       <Maze />
     </AppContainer>
   );
