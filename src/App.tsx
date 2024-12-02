@@ -7,11 +7,14 @@ const AppContainer = styled.div`
   margin: 20px;
 `;
 const mazeData = `
-@--A---+
-       |
-       C
-       |
-      x|`;
+  @
+  | +-C--+
+  A |    |
+  +---B--+
+    |      x
+    |      |
+    +---D--+
+ `;
 const mazeGrid = transformMap(mazeData);
 
 const App: React.FC = () => {
