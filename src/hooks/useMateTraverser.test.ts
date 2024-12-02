@@ -1,4 +1,4 @@
-import useMazeTraverser, { TraversalState } from '../hooks/useMazeTraverser';
+import useMazeTraverser, { TraversalState } from './useMazeTraverser';
 import { vi } from 'vitest';
 import { act } from 'react';
 import { transformMap } from '../util';
@@ -427,5 +427,30 @@ describe('useMazeTraverser Hook invalid inputs', () => {
         const errors = lastUpdate.errors;
 
         expect(errors[0]).toStrictEqual(new Error('Invalid maze: Fake turn found.'));
+    });
+
+    test('Outside bounds', async () => {
+        const mazeData = `
+   @--A---+
+          |
+          C
+          |
+         x|`;
+        const mazeGrid = transformMap(mazeData);
+        const onUpdate = vi.fn<(state: TraversalState) => void>();
+
+        // Render the hook
+        const { result } = renderHook(() => useMazeTraverser(mazeGrid, onUpdate));
+
+        // Start traversal
+        act(() => {
+            result.current.startTraversal();
+        });
+        vi.runAllTimers();
+
+        const lastUpdate = onUpdate.mock.calls[onUpdate.mock.calls.length - 1][0];
+        const errors = lastUpdate.errors;
+
+        expect(errors[0]).toStrictEqual(new Error('Invalid maze: Path leades outside bounds.'));
     });
 });

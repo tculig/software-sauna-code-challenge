@@ -44,6 +44,11 @@ export default function useMazeTraverser(mazeGrid: string[][], onUpdate: (state:
         if (!isTraversing.current || !currentPositionRef.current) return;
 
         directionRef.current = findDirection(mazeGrid, currentPositionRef.current, directionRef.current);
+        if (directionRef.current.x === 0 && directionRef.current.y == 0) {
+            isTraversing.current = false;
+            sendUpdate();
+            return;
+        }
 
         const { x, y } = currentPositionRef.current;
         // Move to next position
@@ -87,6 +92,7 @@ export default function useMazeTraverser(mazeGrid: string[][], onUpdate: (state:
         const currentValue = mazeGrid[currentPosition.y][currentPosition.x];
         //const shouldTurn = /[A-Z+]/.test(currentValue);
         const shouldTurn = currentValue === '+';
+        const goStraight = currentValue === '-' || currentValue === '|';
 
         if (!shouldTurn) {
             // First check "Go straight through intersections" condition
@@ -98,12 +104,15 @@ export default function useMazeTraverser(mazeGrid: string[][], onUpdate: (state:
         }
 
         // If not going straight
-        const directions: Direction[] = [
-            { x: -1, y: 0 }, // left
-            { x: 1, y: 0 }, // right
-            { x: 0, y: -1 }, // up
-            { x: 0, y: 1 }, // down
-        ];
+        const directions: Direction[] = goStraight
+            ? [currentDirection]
+            : [
+                  { x: -1, y: 0 }, // left
+                  { x: 1, y: 0 }, // right
+                  { x: 0, y: -1 }, // up
+                  { x: 0, y: 1 }, // down
+              ];
+
         const validDirections: Direction[] = [];
 
         for (const { x: dx, y: dy } of directions) {
@@ -119,10 +128,11 @@ export default function useMazeTraverser(mazeGrid: string[][], onUpdate: (state:
             //check bounds
             if (newY >= 0 && newY < mazeGrid.length && newX >= 0 && newX < mazeGrid[newY].length) {
                 const currentTile = mazeGrid[newY][newX];
-
                 if (currentTile !== '' && currentTile !== ' ') {
                     validDirections.push({ x: dx, y: dy });
                 }
+            } else {
+                if (goStraight) errorsRef.current.push(new Error('Invalid maze: Path leades outside bounds.'));
             }
         }
         if (validDirections.length === 1) {
