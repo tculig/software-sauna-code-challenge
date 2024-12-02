@@ -20,7 +20,7 @@ const mazeGrid = transformMap(mazeData);
 const App: React.FC = () => {
   return (
     <AppContainer>
-      <h1>Maze Traversal</h1>
+      <h1>Path Traversal</h1>
       <Maze mazeGrid={mazeGrid} />
     </AppContainer>
   );
