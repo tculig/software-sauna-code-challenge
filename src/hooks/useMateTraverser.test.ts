@@ -1,7 +1,7 @@
-import useMazeTraverser, { TraversalState } from '../useMazeTraverser';
+import useMazeTraverser, { TraversalState } from '../hooks/useMazeTraverser';
 import { vi } from 'vitest';
 import { act } from 'react';
-import { transformMap } from '../utils';
+import { transformMap } from '../util';
 import { renderHook } from '@testing-library/react';
 
 describe('useMazeTraverser Hook valid inputs', () => {

@@ -1,39 +1,22 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
-import Cell from './Cell';
-import Controls from './Controls';
-import useMazeTraverser, { TraversalState } from './useMazeTraverser';
-import { transformMap } from './utils';
-/*
-const mazeData = [
-  ['', '', '', '', '', 'x', '', '', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '|', '', '', '+', '-', '-', '+', '', '', '', ''],
-  ['', '', '', '', '', 'A', '', '', '|', '', '', 'C', '', '', '', ''],
-  ['', '@', '-', '-', '-', '|', '-', '-', '-', '-', 'E', '|', '-', '-', '+', ''],
-  ['', '', '', '', '', '|', '', '', '|', '', '', '|', '', '', 'D', ''],
-  ['', '', '', '', '', '+', 'B', '-', '+', '', '', '+', '-', '-', '+', ''],
-];
-*/
-const mazeData = `
-  @
-  | +-C--+
-  A |    |
-  +---B--+
-    |      x
-    |      |
-    +---D--+
- `;
-const mazeGrid = transformMap(mazeData);
+import Cell from '../Cell';
+import Controls from '../Controls';
+import useMazeTraverser, { TraversalState } from '../../hooks/useMazeTraverser';
 
-const MazeContainer = styled.div`
+const MazeContainer = styled.div<{ $columns: number }>`
   display: grid;
-  grid-template-columns: repeat(${mazeGrid[0].length}, 20px);
+  grid-template-columns: repeat(${({ $columns }) => $columns}, 20px);
   grid-gap: 1px;
   justify-content: center;
   margin-bottom: 20px;
 `;
 
-const Maze: React.FC = () => {
+interface MazeProps {
+  mazeGrid: string[][],
+}
+
+const Maze = ({ mazeGrid }: MazeProps) => {
   const [currentPosition, setCurrentPosition] = useState<{ x: number; y: number } | null>(null);
   const [collectedLetters, setCollectedLetters] = useState<string[]>([]);
   const [pathLetters, setPathLetters] = useState<string[]>([]);
@@ -50,7 +33,7 @@ const Maze: React.FC = () => {
 
   return (
     <>
-      <MazeContainer>
+      <MazeContainer $columns={mazeGrid[0].length}>
         {mazeGrid.map((row, y) =>
           row.map((cell, x) => (
             <Cell

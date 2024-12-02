@@ -52,13 +52,6 @@ export default function useMazeTraverser(mazeGrid: string[][], onUpdate: (state:
             y: y + directionRef.current.y,
         };
 
-        // Check bounds
-        if (currentPositionRef.current.y < 0 || currentPositionRef.current.y > mazeGrid.length - 1 || currentPositionRef.current.x < 0 || currentPositionRef.current.x > mazeGrid[currentPositionRef.current.y].length - 1) {
-            isTraversing.current = false;
-            sendUpdate();
-            return;
-        }
-
         const content = mazeGrid[currentPositionRef.current.y][currentPositionRef.current.x];
         pathLettersRef.current.push(content);
         if (content === 'x') {
@@ -192,13 +185,5 @@ export default function useMazeTraverser(mazeGrid: string[][], onUpdate: (state:
         sendUpdate();
     }, [mazeGrid, sendUpdate, traverse]);
 
-    const stopTraversal = useCallback(() => {
-        isTraversing.current = false;
-        if (traversalTimeoutRef.current !== null) {
-            clearTimeout(traversalTimeoutRef.current);
-        }
-        sendUpdate();
-    }, [sendUpdate]);
-
-    return { startTraversal, stopTraversal };
+    return { startTraversal };
 }

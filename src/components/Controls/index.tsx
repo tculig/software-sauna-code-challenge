@@ -20,14 +20,14 @@ const CollectedLetters = styled.p`
 const Controls: React.FC<ControlsProps> = ({ collectedLetters, pathLetters, onStart, isTraversing }) => {
     return (
         <>
-            <Button onClick={onStart} disabled={isTraversing}>
+            <Button onClick={onStart} disabled={isTraversing} data-testid="start-button">
                 {isTraversing ? 'Traversing...' : 'Start Traversal'}
             </Button>
             <CollectedLetters>
-                Letters: {collectedLetters.join('')}
+                Letters: <span>{collectedLetters.join('')}</span>
             </CollectedLetters>
             <CollectedLetters>
-                Path as characters : {pathLetters.join('')}
+                Path as characters : <span>{pathLetters.join('')}</span>
             </CollectedLetters>
         </>
     );
